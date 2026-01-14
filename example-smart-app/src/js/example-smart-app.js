@@ -33,7 +33,13 @@
 
           if (typeof patient.name[0] !== 'undefined') {
             fname = patient.name[0].given.join(' ');
-            lname = patient.name[0].family.join(' ');
+            
+            // check if family name is an array (DSTU2) or string (R4)
+            if (Array.isArray(patient.name[0].family)) {
+                lname = patient.name[0].family.join(' ');
+            } else {
+                lname = patient.name[0].family;
+            }
           }
 
           var height = byCodes('8302-2');
@@ -89,6 +95,8 @@
   function getBloodPressureValue(BPObservations, typeOfPressure) {
     var formattedBPObservations = [];
     BPObservations.forEach(function(observation){
+      if (!observation.component) return;
+
       var BP = observation.component.find(function(component){
         return component.code.coding.find(function(coding) {
           return coding.code == typeOfPressure;
